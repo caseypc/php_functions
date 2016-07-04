@@ -571,3 +571,118 @@ function myTruncate($string, $limit, $break=".", $pad="...") {
 }  
 /***** Example ****/  
 $short_string=myTruncate($long_string, 100, ' '); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Calculate age using birth date
+*/
+function age($date){
+    $time = strtotime($date);
+    if($time === false){
+      return '';
+    }
+ 
+    $year_diff = '';
+    $date = date('Y-m-d', $time);
+    list($year,$month,$day) = explode('-',$date);
+    $year_diff = date('Y') - $year;
+    $month_diff = date('m') - $month;
+    $day_diff = date('d') - $day;
+    if ($day_diff < 0 || $month_diff < 0) $year_diff-;
+ 
+    return $year_diff;
+}
+
+
+
+
+
+
+
+/*
+Compress multiple CSS files
+*/
+header('Content-type: text/css');
+ob_start('compress_css');
+function compress_css($buffer) {
+    /* remove comments in css file */
+    $buffer = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $buffer);
+    /* also remove tabs, spaces, newlines, etc. */
+    $buffer = str_replace(array("\r", "\n", "\r\n", "\t", '  ', '    ', '    '), '', $buffer);
+    return $buffer;
+}
+ 
+/* a list of your css files */
+include('style.css');
+include('css/menu.css');
+include('css/typography.css');
+include('css/print.css');
+include('inc/css/footer.css'); 
+ob_end_flush();
+
+
+
+
+
+
+
+
+
+
+
+/*
+Tracking pixel
+*/
+$img = imagecreate(1, 1);
+$color['lime'] = imagecolorallocate($img, 0x00, 0xFF, 0x00);
+imagecolortransparent($img, $color['lime']);
+header("Content-type: image/png");
+imagepng($img);
+imagedestory($img);
+
+
+
+
+
+
+
+
+<?php
+/*
+Simple PHP cacheing
+*/
+    // define the path and name of cached file
+    $cachefile = 'cached-files/'.date('M-d-Y').'.php';
+    // define how long we want to keep the file in seconds. I set mine to 5 hours.
+    $cachetime = 18000;
+    // Check if the cached file is still fresh. If it is, serve it up and exit.
+    if (file_exists($cachefile) && time() - $cachetime < filemtime($cachefile)) {
+    include($cachefile);
+        exit;
+    }
+    // if there is either no file OR the file to too old, render the page and capture the HTML.
+    ob_start();
+?>
+    <html>
+        output all your html here.
+    </html>
+<?php
+    // We're done! Save the cached content to a file
+    $fp = fopen($cachefile, 'w');
+    fwrite($fp, ob_get_contents());
+    fclose($fp);
+    // finally send browser output
+    ob_end_flush();
+?>
