@@ -201,3 +201,373 @@ if(eregi("googlebot",$HTTP_USER_AGENT))
     $date = date("F j, Y, g:i a");
     mail($email, "[Googlebot] $url", "$date - Google crawled $url");
 } 
+
+
+
+
+
+
+
+
+/*
+$url = "http://google.com";
+$source = display_sourcecode($url);
+echo $source;
+*/
+function display_sourcecode($url)
+{
+$lines = file($url);
+$output = "";
+foreach ($lines as $line_num => $line) { 
+	// loop thru each line and prepend line numbers
+	$output.= "Line #<b>{$line_num}</b> : " . htmlspecialchars($line) . "<br>\n";
+}
+}
+
+
+
+
+
+
+
+
+/*
+Show Facebook likes
+$page = "facebookpagename";
+$count = fb_fan_count($page);
+echo $count;
+?>
+*/
+function fb_fan_count($facebook_name)
+{
+    $data = json_decode(file_get_contents("https://graph.facebook.com/".$facebook_name));
+    $likes = $data->likes;
+    return $likes;
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+Convert URLs in string to hyperlinks
+*
+/
+function makeClickableLinks($text) 
+{  
+ $text = eregi_replace('(((f|ht){1}tp://)[-a-zA-Z0-9@:%_+.~#?&//=]+)',  
+ '<a href="\1">\1</a>', $text);  
+ $text = eregi_replace('([[:space:]()[{}])(www.[-a-zA-Z0-9@:%_+.~#?&//=]+)',  
+ '\1<a href="http://\2">\2</a>', $text);  
+ $text = eregi_replace('([_.0-9a-z-]+@([0-9a-z][0-9a-z-]+.)+[a-z]{2,3})',  
+ '<a href="mailto:\1">\1</a>', $text);  
+  
+return $text;  
+}
+
+
+
+
+
+
+
+
+/*
+Block IPs from acessing website
+*/
+if ( !file_exists('blocked_ips.txt') ) {
+ $deny_ips = array(
+  '127.0.0.1',
+  '192.168.1.1',
+  '83.76.27.9',
+  '192.168.1.163'
+ );
+} else {
+ $deny_ips = file('blocked_ips.txt');
+}
+// read user ip adress:
+$ip = isset($_SERVER['REMOTE_ADDR']) ? trim($_SERVER['REMOTE_ADDR']) : '';
+ 
+// search current IP in $deny_ips array
+if ( (array_search($ip, $deny_ips))!== FALSE ) {
+ // address is blocked:
+ echo 'Your IP adress ('.$ip.') was blocked!';
+ exit;
+}
+
+
+
+
+
+
+
+
+
+/*
+zip a file
+$files=array('file1.jpg', 'file2.jpg', 'file3.gif');  
+create_zip($files, 'myzipfile.zip', true);
+*/
+function create_zip($files = array(),$destination = '',$overwrite = false) {  
+    //if the zip file already exists and overwrite is false, return false  
+    if(file_exists($destination) && !$overwrite) { return false; }  
+    //vars  
+    $valid_files = array();  
+    //if files were passed in...  
+    if(is_array($files)) {  
+        //cycle through each file  
+        foreach($files as $file) {  
+            //make sure the file exists  
+            if(file_exists($file)) {  
+                $valid_files[] = $file;  
+            }  
+        }  
+    }  
+    //if we have good files...  
+    if(count($valid_files)) {  
+        //create the archive  
+        $zip = new ZipArchive();  
+        if($zip->open($destination,$overwrite ? ZIPARCHIVE::OVERWRITE : ZIPARCHIVE::CREATE) !== true) {  
+            return false;  
+        }  
+        //add the files  
+        foreach($valid_files as $file) {  
+            $zip->addFile($file,$file);  
+        }  
+        //debug  
+        //echo 'The zip archive contains ',$zip->numFiles,' files with a status of ',$zip->status;  
+          
+        //close the zip -- done!  
+        $zip->close();  
+          
+        //check to make sure the file exists  
+        return file_exists($destination);  
+    }  
+    else  
+    {  
+        return false;  
+    }  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+unzip a file
+unzip('test.zip','unziped/test'); //File would be unzipped in unziped/test folder
+*/
+function unzip($location,$newLocation)
+{
+        if(exec("unzip $location",$arr)){
+            mkdir($newLocation);
+            for($i = 1;$i< count($arr);$i++){
+                $file = trim(preg_replace("~inflating: ~","",$arr[$i]));
+                copy($location.'/'.$file,$newLocation.'/'.$file);
+                unlink($location.'/'.$file);
+            }
+            return TRUE;
+        }else{
+            return FALSE;
+        }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Resize a image
+*/
+function resize_image($filename, $tmpname, $xmax, $ymax)  
+{  
+    $ext = explode(".", $filename);  
+    $ext = $ext[count($ext)-1];  
+  
+    if($ext == "jpg" || $ext == "jpeg")  
+        $im = imagecreatefromjpeg($tmpname);  
+    elseif($ext == "png")  
+        $im = imagecreatefrompng($tmpname);  
+    elseif($ext == "gif")  
+        $im = imagecreatefromgif($tmpname);  
+      
+    $x = imagesx($im);  
+    $y = imagesy($im);  
+      
+    if($x <= $xmax && $y <= $ymax)  
+        return $im;  
+  
+    if($x >= $y) {  
+        $newx = $xmax;  
+        $newy = $newx * $y / $x;  
+    }  
+    else {  
+        $newy = $ymax;  
+        $newx = $x / $y * $newy;  
+    }  
+      
+    $im2 = imagecreatetruecolor($newx, $newy);  
+    imagecopyresized($im2, $im, 0, 0, 0, 0, floor($newx), floor($newy), $x, $y);  
+    return $im2;   
+}
+
+
+
+
+
+
+
+
+/*
+Read CSV file
+$csvFile = "test.csv";
+$csv = readCSV($csvFile);
+$a = csv[0][0]; // This will get value of Column 1 & Row 1
+*/
+function readCSV($csvFile){
+	$file_handle = fopen($csvFile, 'r');
+	while (!feof($file_handle) ) {
+		$line_of_text[] = fgetcsv($file_handle, 1024);
+	}
+	fclose($file_handle);
+	return $line_of_text;
+}
+
+
+
+
+
+/*
+Creating a CSV file a array
+$data[0] = "apple";
+$data[1] = "oranges";
+generateCsv($data, $delimiter = ',', $enclosure = '"');
+*/
+function generateCsv($data, $delimiter = ',', $enclosure = '"') {
+   $handle = fopen('php://temp', 'r+');
+   foreach ($data as $line) {
+		   fputcsv($handle, $line, $delimiter, $enclosure);
+   }
+   rewind($handle);
+   while (!feof($handle)) {
+		   $contents .= fread($handle, 8192);
+   }
+   fclose($handle);
+   return $contents;
+}
+
+
+
+
+
+
+
+
+
+/*
+Get latest tweet(s) from Twitter account
+$handle = "twittername";
+my_twitter($handle);
+*/
+function my_twitter($username) 
+{
+ 	$no_of_tweets = 1;
+ 	$feed = "http://search.twitter.com/search.atom?q=from:" . $username . "&rpp=" . $no_of_tweets;
+ 	$xml = simplexml_load_file($feed);
+	foreach($xml->children() as $child) {
+		foreach ($child as $value) {
+			if($value->getName() == "link") $link = $value['href'];
+			if($value->getName() == "content") {
+				$content = $value . "";
+		echo '<p class="twit">'.$content.' <a class="twt" href="'.$link.'" title="">&nbsp; </a></p>';
+			}	
+		}
+	}	
+}
+
+
+
+
+/*
+Encode email address with htmlenties
+*/
+function encode_email($email='info@domain.com', $linkText='Contact Us', $attrs ='class="emailencoder"' )  
+{  
+    // remplazar aroba y puntos  
+    $email = str_replace('@', '&#64;', $email);  
+    $email = str_replace('.', '&#46;', $email);  
+    $email = str_split($email, 5);  
+  
+    $linkText = str_replace('@', '&#64;', $linkText);  
+    $linkText = str_replace('.', '&#46;', $linkText);  
+    $linkText = str_split($linkText, 5);  
+      
+    $part1 = '<a href="ma';  
+    $part2 = 'ilto&#58;';  
+    $part3 = '" '. $attrs .' >';  
+    $part4 = '</a>';  
+  
+    $encoded = '<script type="text/javascript">';  
+    $encoded .= "document.write('$part1');";  
+    $encoded .= "document.write('$part2');";  
+    foreach($email as $e)  
+    {  
+            $encoded .= "document.write('$e');";  
+    }  
+    $encoded .= "document.write('$part3');";  
+    foreach($linkText as $l)  
+    {  
+            $encoded .= "document.write('$l');";  
+    }  
+    $encoded .= "document.write('$part4');";  
+    $encoded .= '</script>';  
+  
+    return $encoded;  
+}
+
+
+
+
+
+
+
+
+
+/*
+Truncate text at word break
+*/
+function myTruncate($string, $limit, $break=".", $pad="...") {   
+    // return with no change if string is shorter than $limit    
+    if(strlen($string) <= $limit)   
+        return $string;   
+      
+    // is $break present between $limit and the end of the string?    
+    if(false !== ($breakpoint = strpos($string, $break, $limit))) {  
+        if($breakpoint < strlen($string) - 1) {   
+            $string = substr($string, 0, $breakpoint) . $pad;   
+        }   
+    }  
+    return $string;   
+}  
+/***** Example ****/  
+$short_string=myTruncate($long_string, 100, ' '); 
