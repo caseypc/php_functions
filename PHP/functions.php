@@ -933,4 +933,26 @@ function age($date) {
 	if ($day_diff < 0 || $month_diff < 0) $year_diff-;
 	return $year_diff;
 }
+
+/*--------------------------------------------------------------------------------
+| Validate a US Social Security Number.
+|--------------------------------------------------------------------------------*/
+/*
+3 digits from 001 to 899 (can't be 666)
+2 digits from 01 to 99 (based on some US govt odd/even formula)
+4 digits from 0001 to 9999 (assigned sequentially to individual people)
+last section verifies that none of the number groups are all zeros
+*/
+function isValidSSN($ssn){
+	if (!preg_match('#^([0-8]\d{2})([ \-]?)(\d{2})\2(\d{4})$#', $ssn)) {
+		return false;
+	}
+	// Remove all spaces and/or dashes
+	$ssn = str_replace(' ', '', $ssn);
+	$ssn = str_replace('-', '', $ssn);
+	if (substr($ssn, 0, 3) == '000' || substr($ssn, 0, 3) == '666') { return false; }
+	if (substr($ssn, 4, 2) == '00') { return false; }
+	if (substr($ssn, 7, 4) == '0000') { return false; }
+	return true;
+}
 ?>
