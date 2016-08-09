@@ -955,4 +955,17 @@ function isValidSSN($ssn){
 	if (substr($ssn, 7, 4) == '0000') { return false; }
 	return true;
 }
+/*--------------------------------------------------------------------------------
+| Serialize Safely(?)
+|--------------------------------------------------------------------------------*/
+// if there is a ", ', :, or ; in any of the array values the serialization gets corrupted.
+function safe_serialize($data) {
+	return base64_encode(serialize($data));
+}
+/*--------------------------------------------------------------------------------
+| Unserialize Safely(?)
+|--------------------------------------------------------------------------------*/
+function safe_unserialize($data) {
+	return unserialize(base64_decode($data));
+}
 ?>
