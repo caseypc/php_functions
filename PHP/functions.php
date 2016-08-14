@@ -968,4 +968,17 @@ function safe_serialize($data) {
 function safe_unserialize($data) {
 	return unserialize(base64_decode($data));
 }
+
+// http://www.irongeek.com/i.php?page=security/detect-tor-exit-node-in-php
+public function IsTorExitPoint(){
+    if(gethostbyname(ReverseIPOctets($_SERVER['REMOTE_ADDR']).".".$_SERVER['SERVER_PORT'].".".ReverseIPOctets($_SERVER['SERVER_ADDR']).".ip-port.exitlist.torproject.org")=="127.0.0.2") {
+        return true;
+    } else {
+        return false;
+    } 
+}
+private function ReverseIPOctets($inputip){
+    $ipoc = explode(".",$inputip);
+    return $ipoc[3].".".$ipoc[2].".".$ipoc[1].".".$ipoc[0];
+}
 ?>
