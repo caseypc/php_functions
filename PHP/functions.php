@@ -205,7 +205,7 @@ function validate_ip($ip) {
 }
 
 /*--------------------------------------------------------------------------------
-| Doanlow file function
+| Download file function
 |--------------------------------------------------------------------------------*/
 function download($file){
 	if (file_exists($file)) {
